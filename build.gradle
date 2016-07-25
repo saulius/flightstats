@@ -1,0 +1,32 @@
+plugins {
+  id 'com.github.johnrengelman.shadow' version '1.2.3'
+}
+
+allprojects {
+  apply plugin: 'com.github.johnrengelman.shadow'
+
+  ext {
+    scalaVersion = '2.10'
+    scalaVersionFull = '2.10.5'
+    sparkVersion = '1.6.2'
+  }
+}
+
+apply plugin: 'scala'
+
+repositories {
+  jcenter()
+  mavenCentral()
+}
+
+dependencies {
+  compileOnly "org.apache.spark:spark-core_${scalaVersion}:${sparkVersion}"
+  compileOnly "org.apache.spark:spark-sql_${scalaVersion}:${sparkVersion}"
+  testCompile "org.scalatest:scalatest_${scalaVersion}:2.2.6"
+}
+
+shadowJar {
+  zip64 true
+}
+
+build.dependsOn shadowJar
