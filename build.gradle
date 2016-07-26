@@ -1,18 +1,18 @@
 plugins {
   id 'com.github.johnrengelman.shadow' version '1.2.3'
+  id 'com.github.maiflai.scalatest' version '0.13'
 }
 
-allprojects {
-  apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.github.johnrengelman.shadow'
 
-  ext {
-    scalaVersion = '2.10'
-    scalaVersionFull = '2.10.5'
-    sparkVersion = '1.6.2'
-  }
+ext {
+  scalaVersion = '2.10'
+  scalaVersionFull = '2.10.5'
+  sparkVersion = '1.6.2'
 }
 
 apply plugin: 'scala'
+apply plugin: 'com.github.maiflai.scalatest'
 
 repositories {
   jcenter()
@@ -22,7 +22,12 @@ repositories {
 dependencies {
   compileOnly "org.apache.spark:spark-core_${scalaVersion}:${sparkVersion}"
   compileOnly "org.apache.spark:spark-sql_${scalaVersion}:${sparkVersion}"
+  compile "com.databricks:spark-csv_${scalaVersion}:1.4.0"
+
+  testCompile "org.apache.spark:spark-core_${scalaVersion}:${sparkVersion}"
+  testCompile "org.apache.spark:spark-sql_${scalaVersion}:${sparkVersion}"
   testCompile "org.scalatest:scalatest_${scalaVersion}:2.2.6"
+  testRuntime 'org.pegdown:pegdown:1.1.0'
 }
 
 shadowJar {
