@@ -8,7 +8,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 ext {
   scalaVersion = '2.10'
   scalaVersionFull = '2.10.5'
-  sparkVersion = '1.6.2'
+  sparkVersion = '2.0.0'
 }
 
 apply plugin: 'scala'
@@ -22,7 +22,6 @@ repositories {
 dependencies {
   compileOnly "org.apache.spark:spark-core_${scalaVersion}:${sparkVersion}"
   compileOnly "org.apache.spark:spark-sql_${scalaVersion}:${sparkVersion}"
-  compile "com.databricks:spark-csv_${scalaVersion}:1.4.0"
 
   testCompile "org.apache.spark:spark-core_${scalaVersion}:${sparkVersion}"
   testCompile "org.apache.spark:spark-sql_${scalaVersion}:${sparkVersion}"

@@ -1,35 +1,30 @@
 package com.github.saulius.flightstats.jobs
 
 import org.apache.spark.{SparkContext, SparkConf}
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.SparkSession
 import org.scalatest.{FunSpec, Matchers, BeforeAndAfterAll}
 
 class JobTestSuite extends FunSpec with Matchers with BeforeAndAfterAll {
-  var _sparkContext: SparkContext = null
-  var _sqlContext: SQLContext = null
-  lazy val sparkContext = _sparkContext
-  lazy val sqlContext = _sqlContext
+  var _sparkSession: SparkSession = null
+  lazy val sparkSession = _sparkSession
 
   override protected def beforeAll(): Unit = {
     super.beforeAll()
 
-    val conf: SparkConf = new SparkConf()
-      .setMaster("local[*]")
-      .setAppName("JobTestSuite")
-
-    _sqlContext = new SQLContext(new SparkContext(conf))
-    _sparkContext = sqlContext.sparkContext
+    _sparkSession = SparkSession.builder
+      .master("local")
+      .getOrCreate()
   }
 
   override protected def afterAll(): Unit = {
     try {
-      _sqlContext.sparkContext.stop()
+      _sparkSession.sparkContext.stop()
     } finally {
       super.afterAll()
     }
   }
 
-  import sqlContext.implicits._
+  import sparkSession.implicits._
 
   describe("TopAirportsJob.process") {
     it("returns counted flights for each airport") {
@@ -37,7 +32,7 @@ class JobTestSuite extends FunSpec with Matchers with BeforeAndAfterAll {
                        ("ORD", "DFW"),
                        ("ATL", "ORD")).toDF("Origin", "Dest")
 
-      val job = new TopAirportsJob(sqlContext)
+      val job = new TopAirportsJob(sparkSession)
 
       job.process(testDF).collect.map { row =>
         (row.getAs[String]("airport"), row.getAs[Integer]("flight_count"))
@@ -54,7 +49,7 @@ class JobTestSuite extends FunSpec with Matchers with BeforeAndAfterAll {
         ("ATL", "ORD", -10, 2013,8, 9)  // filtered out, negative arrival delay
       ).toDF("Origin", "Dest", "ArrDelay", "Year", "Month", "DayofMonth")
 
-      val job = new TopDelayedLinksJob(sqlContext)
+      val job = new TopDelayedLinksJob(sparkSession)
 
       val expectedResult = Seq(("ORD -> ATL", 90, "2016-01-01", "2016-04-05", 2),
                                ("ATL -> DFW", 20, "2015-02-03", "2015-02-03", 1))
@@ -80,7 +75,7 @@ class JobTestSuite extends FunSpec with Matchers with BeforeAndAfterAll {
         ("ATL", "DFW", 5,  2, 2100)
       ).toDF("Origin", "Dest", "ArrDelay", "DayOfWeek", "DepTime")
 
-      val job = new ArrivalDelayPredictionJob(sqlContext)
+      val job = new ArrivalDelayPredictionJob(sparkSession)
 
       val expectedResult = Seq(("ORD -> ATL", 1, 0, 50.0, 0.0, 50.0),
                                ("ORD -> ATL", 1, 1, 100.0, 0.0, 0.0),

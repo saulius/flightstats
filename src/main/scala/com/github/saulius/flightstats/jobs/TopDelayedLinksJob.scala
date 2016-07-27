@@ -1,12 +1,12 @@
 package com.github.saulius.flightstats.jobs
 
-import org.apache.spark.sql.{DataFrame, SQLContext}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions._
 
 import com.github.saulius.flightstats.Job
 
-class TopDelayedLinksJob(sqlContext: SQLContext) extends Job(sqlContext) {
-  import sqlContext.implicits._
+class TopDelayedLinksJob(sparkSession: SparkSession) extends Job(sparkSession) {
+  import sparkSession.implicits._
 
   val showRows = 20
 
