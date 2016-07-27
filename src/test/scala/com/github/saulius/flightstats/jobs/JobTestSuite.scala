@@ -31,7 +31,7 @@ class JobTestSuite extends FunSpec with Matchers with BeforeAndAfterAll {
 
   import sqlContext.implicits._
 
-  describe("TopAirportsJobTest.process") {
+  describe("TopAirportsJob.process") {
     it("returns counted flights for each airport") {
       val testDF = Seq(("ORD", "ATL"),
                        ("ORD", "DFW"),
@@ -45,7 +45,7 @@ class JobTestSuite extends FunSpec with Matchers with BeforeAndAfterAll {
     }
   }
 
-  describe("TopDelayedLinksJobTest.process") {
+  describe("TopDelayedLinksJob.process") {
     it("returns top delayed links by arrival delay time") {
       val testDF = Seq(
         ("ORD", "ATL", 10, 2016, 1, 1),
@@ -66,6 +66,34 @@ class JobTestSuite extends FunSpec with Matchers with BeforeAndAfterAll {
           row.getAs[String]("earliest_date"),
           row.getAs[String]("latest_date"),
           row.getAs[Integer]("number_of_links")
+        )
+      } should contain theSameElementsAs expectedResult
+    }
+  }
+
+  describe("ArrivalDelayPredictionJob.process") {
+    it("returns probabilities of being late split by route, day of week and departure time block") {
+      val testDF = Seq(
+        ("ORD", "ATL", 20, 1, 200),
+        ("ORD", "ATL", 0,  1, 300),
+        ("ORD", "ATL", 0,  1, 500),
+        ("ATL", "DFW", 5,  2, 2100)
+      ).toDF("Origin", "Dest", "ArrDelay", "DayOfWeek", "DepTime")
+
+      val job = new ArrivalDelayPredictionJob(sqlContext)
+
+      val expectedResult = Seq(("ORD -> ATL", 1, 0, 50.0, 0.0, 50.0),
+                               ("ORD -> ATL", 1, 1, 100.0, 0.0, 0.0),
+                               ("ATL -> DFW", 2, 5, 0.0, 100.0, 0.0))
+
+      job.process(testDF).collect.map { row =>
+        (
+          row.getAs[String]("route"),
+          row.getAs[Integer]("day_of_week"),
+          row.getAs[Integer]("departure_time_block"),
+          row.getAs[Double]("p_on_time"),
+          row.getAs[Double]("p_less_than_ten_mins_late"),
+          row.getAs[Double]("p_more_than_ten_mins_late")
         )
       } should contain theSameElementsAs expectedResult
     }
