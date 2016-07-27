@@ -8,6 +8,7 @@ import com.github.saulius.flightstats.Job
 class ArrivalDelayPredictionJob(sqlContext: SQLContext) extends Job(sqlContext) {
   import sqlContext.implicits._
 
+  val showRows = 100
   val HOURS_PER_DEPARTURE_TIME_BLOCK = 4
 
   def process(input: DataFrame) =
@@ -33,5 +34,4 @@ class ArrivalDelayPredictionJob(sqlContext: SQLContext) extends Job(sqlContext) 
         round($"less_than_ten_mins_late".cast("float") / $"total" * 100) as "p_less_than_ten_mins_late",
         round($"more_than_ten_mins_late".cast("float") / $"total" * 100) as "p_more_than_ten_mins_late")
       .orderBy($"p_more_than_ten_mins_late".desc)
-      .limit(100)
 }

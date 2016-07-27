@@ -8,6 +8,8 @@ import com.github.saulius.flightstats.Job
 class TopAirportsJob(sqlContext: SQLContext) extends Job(sqlContext) {
   import sqlContext.implicits._
 
+  val showRows = 20
+
   def process(input: DataFrame) =
     input
       .select(array($"Origin", $"Dest") as "airports")
@@ -16,5 +18,4 @@ class TopAirportsJob(sqlContext: SQLContext) extends Job(sqlContext) {
       .groupBy($"airport")
       .agg(count("*") as "flight_count")
       .orderBy($"flight_count".desc)
-      .limit(20)
 }

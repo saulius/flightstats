@@ -8,6 +8,8 @@ import com.github.saulius.flightstats.Job
 class TopDelayedLinksJob(sqlContext: SQLContext) extends Job(sqlContext) {
   import sqlContext.implicits._
 
+  val showRows = 20
+
   def process(input: DataFrame) =
     input
       .filter($"ArrDelay" > lit(0))
@@ -25,5 +27,4 @@ class TopDelayedLinksJob(sqlContext: SQLContext) extends Job(sqlContext) {
            max($"date") as "latest_date",
            count($"link") as "number_of_links")
       .orderBy($"combined_delay".desc)
-      .limit(20)
 }

@@ -7,6 +7,9 @@ trait RunnableJob {
 }
 
 abstract class Job(sqlContext: SQLContext) extends RunnableJob {
+  // How many rows to include in the result
+  def showRows: Int
+
   def run(inputPath: String) =
     process(
       sqlContext
@@ -15,7 +18,7 @@ abstract class Job(sqlContext: SQLContext) extends RunnableJob {
         .option("header", "true")
         .option("inferSchema", "true")
         .load(inputPath)
-    ).show
+    ).limit(showRows).show(numRows = showRows)
 
   def process(input: DataFrame): DataFrame
 }
